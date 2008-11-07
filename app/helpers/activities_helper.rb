@@ -106,6 +106,10 @@ module ActivitiesHelper
       %(#{person_link_with_image(person)} is attending
         #{someones(event.person, person)} event: 
         #{event_link(event.title, event)}.) 
+    when "Group"
+      %(#{person_link(person)} created the group '#{group_link(Group.find(activity.item))}')
+    when "Membership"
+      %(#{person_link(person)} joined the group '#{group_link(Group.find(activity.item.group))}')
     else
       raise "Invalid activity type #{activity_type(activity).inspect}"
     end
@@ -167,6 +171,10 @@ module ActivitiesHelper
       event = activity.item.event
       %(#{person_link(person)} is attending
         #{someones(event.person, person)} #{event_link("event", event)}.)
+    when "Group"
+      %(#{person_link(person)} created the group '#{group_link(Group.find(activity.item))}')
+    when "Membership"
+      %(#{person_link(person)} joined the group '#{group_link(Group.find(activity.item.group))}')
     else
       raise "Invalid activity type #{activity_type(activity).inspect}"
     end
@@ -209,6 +217,10 @@ module ActivitiesHelper
             when "EventAttendee"
               # TODO: replace with a png icon
               "check.gif"
+            when "Group"
+              "new.gif"
+            when "Membership"
+              "add.gif"
             else
               raise "Invalid activity type #{activity_type(activity).inspect}"
             end

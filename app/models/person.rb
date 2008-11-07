@@ -74,7 +74,7 @@ class Person < ActiveRecord::Base
   has_many :connections
   has_many :contacts, :through => :connections,
                       :conditions => ACCEPTED_AND_ACTIVE,
-                      :order => 'people.created_at DESC'
+                      :order => 'people.name ASC'
   has_many :photos, :dependent => :destroy, :order => 'created_at'
   has_many :requested_contacts, :through => :connections,
            :source => :contact,
@@ -98,6 +98,19 @@ class Person < ActiveRecord::Base
   has_many :event_attendees
   has_many :attendee_events, :through => :event_attendees, :source => :event
 
+  
+  has_many :own_groups, :class_name => "Group", :foreign_key => "person_id",
+    :order => "name ASC"
+  has_many :own_not_hidden_groups, :class_name => "Group", 
+    :foreign_key => "person_id", :conditions => "mode != 2", :order => "name ASC"
+  has_many :own_hidden_groups, :class_name => "Group", 
+    :foreign_key => "person_id", :conditions => "mode = 2", :order => "name ASC"
+  has_many :memberships
+  has_many :groups, :through => :memberships, :source => :group, 
+    :conditions => "status = 0", :order => "name ASC"
+  has_many :groups_not_hidden, :through => :memberships, :source => :group, 
+    :conditions => "status = 0 and mode != 2", :order => "name ASC"
+  
   validates_presence_of     :email, :name
   validates_presence_of     :password,              :if => :password_required?
   validates_presence_of     :password_confirmation, :if => :password_required?
@@ -191,6 +204,16 @@ class Person < ActiveRecord::Base
   # Return some contacts for the home page.
   def some_contacts
     contacts[(0...MAX_DEFAULT_CONTACTS)]
+  end
+  
+  def requested_memberships
+    Membership.find(:all, 
+          :conditions => ['status = 2 and group_id in (?)', self.own_group_ids])
+  end
+  
+  def invitations
+    Membership.find_all_by_person_id(self, 
+          :conditions => ['status = 1'], :order => 'created_at DESC')
   end
 
   # Contact links for the contact image raster.

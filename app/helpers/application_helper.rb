@@ -28,6 +28,7 @@ module ApplicationHelper
       #contacts = menu_element("Contacts",
       #                        person_connections_path(current_person))
       events   = menu_element("Events", events_path)
+      groups = menu_element("Groups", groups_path())
       #links = [home, profile, contacts, messages, blog, people, forum]
       links = [home, profile, messages, people, forum]
       # TODO: put this in once events are ready.
@@ -39,7 +40,8 @@ module ApplicationHelper
       forums =  menu_element(inflect("Forum", Forum.count),
                              admin_forums_path)
       preferences = menu_element("Prefs", admin_preferences_path)
-      links = [home, people, forums, preferences]
+      groups = menu_element("Groups", admin_groups_path)
+      links = [home, people, groups, forums, preferences]
     else
       links = [home, people]
     end

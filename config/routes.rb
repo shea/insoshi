@@ -6,6 +6,21 @@ ActionController::Routing::Routes.draw do |map|
     event.resources :comments
   end
 
+  map.resources :memberships, :member => {:unsuscribe => :delete, :suscribe => :post}
+
+  map.resources :groups, 
+    :member => { :join => :post, 
+       :leave => :post, 
+       :members => :get, 
+       :invite => :get,
+       :invite_them => :post,
+       :photos => :get,
+       :new_photo => :post,
+       :save_photo => :post,
+       :delete_photo => :delete } do |group|
+   group.resources :memberships
+ end
+ 
   map.resources :preferences
   map.resources :searches
   map.resources :activities
@@ -25,7 +40,8 @@ ActionController::Routing::Routes.draw do |map|
                                       :common_contacts => :get }
   map.connect 'people/verify/:id', :controller => 'people',
                                     :action => 'verify_email'
-  map.resources :people do |person|
+  map.resources :people, :member => {:groups => :get, 
+    :admin_groups => :get, :request_memberships => :get, :invitations => :get} do |person|
      person.resources :messages
      person.resources :galleries
      person.resources :connections
@@ -36,7 +52,7 @@ ActionController::Routing::Routes.draw do |map|
     gallery.resources :photos
   end
   map.namespace :admin do |admin|
-    admin.resources :people, :preferences
+    admin.resources :people, :preferences, :groups
     admin.resources :forums do |forums|
       forums.resources :topics do |topic|
         topic.resources :posts

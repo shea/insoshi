@@ -4,7 +4,7 @@ class PeopleController < ApplicationController
   skip_before_filter :admin_warning, :only => [ :show, :update ]
   before_filter :login_required, :only => [ :show, :edit, :update,
                                             :common_contacts ]
-  before_filter :correct_user_required, :only => [ :edit, :update ]
+  before_filter :correct_user_required, :only => [ :edit, :update, :invitations ]
   before_filter :setup
   
   def index
@@ -32,6 +32,8 @@ class PeopleController < ApplicationController
       @blog = @person.blog
       @posts = @person.blog.posts.paginate(:page => params[:page])
       @galleries = @person.galleries.paginate(:page => params[:page])
+      @groups = current_person == @person ? @person.groups : @person.groups_not_hidden
+      @own_groups = current_person == @person ? @person.own_groups : @person.own_not_hidden_groups
     end
     respond_to do |format|
       format.html
@@ -146,6 +148,31 @@ class PeopleController < ApplicationController
     respond_to do |format|
       format.html
     end
+  end
+  
+  def groups
+    @person = Person.find(params[:id])
+    @groups = current_person == @person ? @person.groups : @person.groups_not_hidden
+    
+    respond_to do |format|
+      format.html
+    end
+  end
+  
+  def admin_groups
+    @person = Person.find(params[:id])
+    @groups = @person.own_groups
+    render :action => :groups
+  end
+  
+  def request_memberships
+    @person = Person.find(params[:id])
+    @requested_memberships = @person.requested_memberships
+  end
+  
+  def invitations
+    @person = Person.find(params[:id])
+    @invitations = @person.invitations
   end
   
   private
