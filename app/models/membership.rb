@@ -42,18 +42,19 @@ class Membership < ActiveRecord::Base
         if group.public? or group.private?
           transaction do
             create(:person => person, :group => group, :status => PENDING)
+            if send_mail
+              membership = person.memberships.find(:first, :conditions => ['group_id = ?',group])
+              PersonMailer.deliver_membership_request(membership)
+            end
           end
           if group.public?
             membership = person.memberships.find(:first, :conditions => ['group_id = ?',group])
             membership.accept
+            if send_mail
+              PersonMailer.deliver_membership_public_group(membership)
+            end
           end
         end
-#        if send_mail
-#          # The order here is important: the mail is sent *to* the contact,
-#          # so the connection should be from the contact's point of view.
-#          connection = conn(contact, person)
-#          PersonMailer.deliver_connection_request(connection)
-#        end
         true
       end
     end
@@ -68,13 +69,11 @@ class Membership < ActiveRecord::Base
       else
         transaction do
           create(:person => person, :group => group, :status => INVITED)
+          if send_mail
+            membership = person.memberships.find(:first, :conditions => ['group_id = ?',group])
+            PersonMailer.deliver_invitation_notification(membership)
+          end
         end
-#        if send_mail
-#          # The order here is important: the mail is sent *to* the contact,
-#          # so the connection should be from the contact's point of view.
-#          connection = conn(contact, person)
-#          PersonMailer.deliver_connection_request(connection)
-#        end
         true
       end
     end
@@ -93,7 +92,6 @@ class Membership < ActiveRecord::Base
     def breakup(person, group)
       transaction do
         destroy(mem(person, group))
-#        destroy(conn(contact, person))
       end
     end
     

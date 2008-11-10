@@ -35,6 +35,7 @@ class MembershipsController < ApplicationController
       case params[:commit]
       when "Accept"
         @membership.accept
+        PersonMailer.deliver_invitation_accepted(@membership)
         flash[:notice] = %(Accepted membership with
                            <a href="#{group_path(@membership.group)}">#{name}</a>)
       when "Decline"
@@ -68,6 +69,7 @@ class MembershipsController < ApplicationController
   def suscribe
     @membership = Membership.find(params[:id])
     @membership.accept
+    PersonMailer.deliver_membership_accepted(@membership)
 
     respond_to do |format|
       flash[:success] = "You have accept '#{@membership.person.name}' for group '#{@membership.group.name}'"
