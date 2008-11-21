@@ -9,7 +9,7 @@ atom_feed do |feed|
       entry.content(feed_message(activity, false), :type => 'html')
 
       entry.author do |author|
-        author.name(activity.person.name)
+        author.name(activity.owner.name)
       end
     end
   end

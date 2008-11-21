@@ -3,18 +3,28 @@ class Group < ActiveRecord::Base
   
   validates_presence_of :name, :person_id
   
-  has_many :photos, :dependent => :destroy, :order => "created_at"
+  NUM_WALL_COMMENTS = 10
+  
+  has_many :photos, :as => :owner, :dependent => :destroy, :order => "created_at"
   has_many :memberships, :dependent => :destroy
   has_many :people, :through => :memberships, 
-    :conditions => "status = 0", :order => "name DESC"
+    :conditions => "status = 0", :order => "name ASC"
   has_many :pending_request, :through => :memberships, :source => "person",
     :conditions => "status = 2", :order => "name DESC"
   
   belongs_to :owner, :class_name => "Person", :foreign_key => "person_id"
   
-  has_many :activities, :foreign_key => "item_id", :dependent => :destroy
+  has_many :activities, :as => :owner, :conditions => ["owner_type = ?","Group"],
+    :foreign_key => "item_id", :dependent => :destroy
   
-  after_save :log_activity
+  has_many :galleries, :as => :owner, :dependent => :destroy
+  
+  has_many :comments, :as => :commentable, :order => 'created_at DESC',
+                      :limit => NUM_WALL_COMMENTS, :dependent => :destroy
+  
+  after_create :log_activity
+  before_update :set_old_description
+  after_update :log_activity_description_changed
   
   is_indexed :fields => [ 'name', 'description']
   
@@ -32,6 +42,12 @@ class Group < ActiveRecord::Base
                      :conditions => ["mode = ? OR mode = ?", PUBLIC,PRIVATE],
                      :order => "name ASC")
     end
+  end
+  
+  def recent_activity
+    Activity.find_all_by_owner_id(self, :order => 'created_at DESC',
+                                        :conditions => "owner_type = 'Group'",
+                                         :limit => 10)
   end
   
   def public?
@@ -57,7 +73,7 @@ class Group < ActiveRecord::Base
   ## Photo helpers
   def photo
     # This should only have one entry, but be paranoid.
-    photos.find_all_by_primary(true).first
+    photos.find_all_by_avatar(true).first
   end
 
   # Return all the photos other than the primary one
@@ -93,10 +109,20 @@ class Group < ActiveRecord::Base
   
   private
   
+  def set_old_description
+    @old_description = Group.find(self).description
+  end
+
+  def log_activity_description_changed
+    unless @old_description == description or description.blank?
+      add_activities(:item => self, :owner => self)
+    end
+  end
+  
   def log_activity
     if not self.hidden?
-      activity = Activity.create!(:item => self, :person => Person.find(self.person_id))
-      add_activities(:activity => activity, :person => Person.find(self.person_id))
+      activity = Activity.create!(:item => self, :owner => Person.find(self.person_id))
+      add_activities(:activity => activity, :owner => Person.find(self.person_id))
     end
   end
   

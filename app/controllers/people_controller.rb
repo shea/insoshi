@@ -17,6 +17,7 @@ class PeopleController < ApplicationController
   
   def show
     @person = Person.find(params[:id])
+    @parent = @person
     unless @person.active? or current_person.admin?
       flash[:error] = "That person is not active"
       redirect_to home_url and return
@@ -33,7 +34,9 @@ class PeopleController < ApplicationController
       @posts = @person.blog.posts.paginate(:page => params[:page])
       @galleries = @person.galleries.paginate(:page => params[:page])
       @groups = current_person == @person ? @person.groups : @person.groups_not_hidden
+      @some_groups = @groups[0...num_contacts]
       @own_groups = current_person == @person ? @person.own_groups : @person.own_not_hidden_groups
+      @some_own_groups = @own_groups[0...num_contacts]
     end
     respond_to do |format|
       format.html
@@ -153,6 +156,7 @@ class PeopleController < ApplicationController
   def groups
     @person = Person.find(params[:id])
     @groups = current_person == @person ? @person.groups : @person.groups_not_hidden
+    @some_groups = @groups.paginate(:page => params[:page], :per_page => RASTER_PER_PAGE)
     
     respond_to do |format|
       format.html
@@ -161,18 +165,9 @@ class PeopleController < ApplicationController
   
   def admin_groups
     @person = Person.find(params[:id])
-    @groups = @person.own_groups
+    @groups = current_person == @person ? @person.own_groups : @person.own_not_hidden_groups
+    @some_groups = @groups.paginate(:page => params[:page], :per_page => RASTER_PER_PAGE)
     render :action => :groups
-  end
-  
-  def request_memberships
-    @person = Person.find(params[:id])
-    @requested_memberships = @person.requested_memberships
-  end
-  
-  def invitations
-    @person = Person.find(params[:id])
-    @invitations = @person.invitations
   end
   
   private

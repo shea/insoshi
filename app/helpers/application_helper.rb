@@ -30,7 +30,8 @@ module ApplicationHelper
       events   = menu_element("Events", events_path)
       groups = menu_element("Groups", groups_path())
       #links = [home, profile, contacts, messages, blog, people, forum]
-      links = [home, profile, messages, people, forum]
+      groups = menu_element("Groups", groups_path())
+      links = [home, profile, messages, people, groups, forum]
       # TODO: put this in once events are ready.
       # links.push(events)
       

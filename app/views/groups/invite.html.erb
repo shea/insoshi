@@ -10,8 +10,10 @@
       <% end %>
     </ul>
 
-    <div><input type='submit' value='Select all' onclick="$$('#form input.check').each(function(box){box.checked=!box.checked});return false;" class="button" />
-    <%= submit_tag "Invite", :class => "button", :id => "button" %></div>
+    <div>
+      <input type='submit' id="checkboxall" value='Select all' class="button" />
+      <%= submit_tag "Invite", :class => "button", :id => "button" %></div>
+    <div></div>
   <% end %>
 <%- end -%>
 
@@ -19,3 +21,21 @@
   <%= render :partial => 'searches/box' %>
   <%= render :partial => 'shared/minifeed' %>
 <%- end -%>
+
+<script type='text/javascript'>
+  $(document).ready(function(){
+    $("#checkboxall").click(function(){
+      var checked = false;
+      if ($("input#checkboxall").attr("value") == "Select all"){
+        $("input#checkboxall").attr("value","Deselect all");
+        var checked = !checked;
+      } else {
+        $("input#checkboxall").attr("value","Select all");
+      };
+      $("input.check").each(function(){
+        this.checked = checked;
+      });
+      return false;
+    });
+  });
+</script>

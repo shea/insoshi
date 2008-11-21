@@ -86,6 +86,8 @@ class CommentsController < ApplicationController
       @comment = Comment.find(params[:id])
       if wall?
         current_person?(person) or current_person?(@comment.commenter)
+      elsif group_wall?
+        @comment.commentable.owner?(current_person) or current_person?(@comment.commenter)
       elsif blog?
         current_person?(person)
       end
@@ -112,6 +114,8 @@ class CommentsController < ApplicationController
     def parent
       if wall?
         @person
+      elsif group_wall?
+        Group.find(params[:group_id])
       elsif blog?
         @post
       elsif event?
@@ -129,6 +133,8 @@ class CommentsController < ApplicationController
     def resource
       if wall?
         "wall"
+      elsif group_wall?
+        "group_wall"
       elsif blog?
         "blog_post"
       elsif event?
@@ -140,6 +146,8 @@ class CommentsController < ApplicationController
     def comments_url
       if wall?
         (person_url @person)+'#tWall'  # go directly to comments tab
+      elsif group_wall?
+        (group_url @comment.commentable)+'#tWall'  # go directly to comments tab
       elsif blog?
         blog_post_url(@blog, @post)
       elsif event?
@@ -150,6 +158,10 @@ class CommentsController < ApplicationController
     # True if resource lives on a wall.
     def wall?
       !params[:person_id].nil?
+    end
+    
+    def group_wall?
+      !params[:group_id].nil?
     end
 
     # True if resource lives in a blog.

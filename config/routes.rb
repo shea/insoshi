@@ -1,11 +1,4 @@
 ActionController::Routing::Routes.draw do |map|
-  map.resources :categories
-  map.resources :links
-  map.resources :events, :member => { :attend => :get, 
-                                      :unattend => :get } do |event|
-    event.resources :comments
-  end
-
   map.resources :memberships, :member => {:unsuscribe => :delete, :suscribe => :post}
 
   map.resources :groups, 
@@ -19,8 +12,17 @@ ActionController::Routing::Routes.draw do |map|
        :save_photo => :post,
        :delete_photo => :delete } do |group|
    group.resources :memberships
+   group.resources :galleries
+   group.resources :comments
  end
- 
+
+  map.resources :categories
+  map.resources :links
+  map.resources :events, :member => { :attend => :get, 
+                                      :unattend => :get } do |event|
+    event.resources :comments
+  end
+
   map.resources :preferences
   map.resources :searches
   map.resources :activities
@@ -32,7 +34,6 @@ ActionController::Routing::Routes.draw do |map|
                                   :action => "create",
                                   :requirements => { :method => :get }
   map.resource :session
-  map.resource :galleries
   map.resources :messages, :collection => { :sent => :get, :trash => :get },
                            :member => { :reply => :get, :undestroy => :put }
 

@@ -1,16 +1,16 @@
 <%- unless groups.empty? -%>
-  <h2><%= title %></h2>
-  <ul class="grid contacts small">
-    <%- groups.each do |group| -%>
-      <li class="vcard">
-        <%= image_link(group, :image_options => { :class => "photo fn" },
-                                :link_options =>  { :class => "url" }) %>
-      </li>
+  <%- if title -%>
+    <h3><%= title %></h3>
+  <%- end -%>
+  <% if groups.count > Person::MAX_DEFAULT_CONTACTS and link %>
+    <div class='see_all_link'>
+      <%= link_to "All #{title}",
+        link == "admin" ? admin_groups_person_path(@person) : groups_person_path(@person) %>
+    </div>
+  <% end %>
+  <ul class="grid contacts medium">
+    <%- some_groups.each do |group| -%>
+      <%= render :partial => 'shared/contact', :locals => {:contact => group} %>
     <%- end -%>
-    <li class="more">
-      <%= link_to "See all &raquo;", 
-          link == "admin" ? 
-              admin_groups_person_path(@person) : groups_person_path(@person) %>
-    </li>
   </ul>
 <%- end -%>

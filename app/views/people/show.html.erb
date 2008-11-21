@@ -20,10 +20,10 @@
     <div class="clear"></div>
   <% end %>
 
-  <%= render :partial => 'groups', 
-             :locals => {:groups => @own_groups, :title => "Admin Groups", :link => "admin"} %>
-  <%= render :partial => 'groups', 
-             :locals => {:groups => @groups, :title => "Groups", :link => "groups"} %>
+  <% tabs.create('tGroups', 'Groups') do %>
+    <%= render :partial => 'profile_groups' %>
+    <div class="clear"></div>
+  <% end %>
 
   <% tabs.create('tBlog', 'Blog') do %>
     <%= render :partial => 'shared/blog' %>

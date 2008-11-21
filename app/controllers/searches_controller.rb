@@ -37,6 +37,10 @@ class SearchesController < ApplicationController
         # Convert to people so that the routing works.
         @results.map!{ |person| Person.find(person) }
       end
+      if model == "Group"
+        @results.map!{ |group| group.hidden? ? nil:group}
+        @results = @results.compact
+      end
     end
   rescue Ultrasphinx::UsageError
     flash[:error] = "Invalid search query"

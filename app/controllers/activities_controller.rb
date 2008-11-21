@@ -23,7 +23,7 @@ class ActivitiesController < ApplicationController
 
     def authorize_user
       @activity = Activity.find(params[:id])
-      unless current_person?(@activity.person)
+      unless current_person?(@activity.owner)
         redirect_to home_url
       end
     end

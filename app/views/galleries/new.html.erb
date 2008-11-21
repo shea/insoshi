@@ -12,7 +12,10 @@
     <div class="form_row">
       <label for="description">Description</label>
       <%= f.text_area :description, :rows => 5 %>
-    <div>
+    </div>
+    
+    <%= hidden_field_tag :parent, params[:group_id].nil? ? "person" : "group"  %>
+    <%= hidden_field_tag :parent_id, params[:group_id].nil? ? params[:person_id] : params[:group_id] %>
 
     <div class="form_row">
       <%= f.submit "Create", :class => "button" %>

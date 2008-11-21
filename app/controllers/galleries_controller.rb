@@ -10,8 +10,8 @@ class GalleriesController < ApplicationController
   
   def index
     @body = "galleries"
-    @person = Person.find(params[:person_id])
-    @galleries = @person.galleries.paginate :page => params[:page]
+    @parent = params[:person_id].nil? ? Group.find(params[:group_id]) : Person.find(params[:person_id])
+    @galleries = @parent.galleries.paginate :page => params[:page]
   end
   
   def new
@@ -19,7 +19,7 @@ class GalleriesController < ApplicationController
   end
   
   def create
-    @gallery = current_person.galleries.build(params[:gallery])
+    @gallery = parent.galleries.build(params[:gallery])
     respond_to do |format|
       if @gallery.save
         flash[:success] = "Gallery successfully created"
@@ -47,30 +47,59 @@ class GalleriesController < ApplicationController
   end
   
   def destroy
-    if current_person.galleries.count == 1
+    gallery = Gallery.find(params[:id])
+    owner = gallery.owner
+    owner_type = gallery.owner_type
+    if owner.galleries.count == 1
       flash[:error] = "You can't delete the final gallery"
-    elsif Gallery.find(params[:id]).destroy
+    elsif gallery.destroy
       flash[:success] = "Gallery successfully deleted"
     else
       flash[:error] = "Gallery could not be deleted"
     end
 
     respond_to do |format|
-      format.html { redirect_to person_galleries_path(current_person) }
+      if owner_type == "Person"
+        format.html { redirect_to person_galleries_path(current_person) }
+      else
+        format.html { redirect_to group_galleries_path(owner) }
+      end
     end
 
   end
  
   private
   
+    # Return a the parent (person or group) of the gallery.
+    def parent
+      if person?
+        Person.find(params[:parent_id])
+      elsif group?
+        Group.find(params[:parent_id])
+      end
+    end
+    
+    def person?
+      params[:parent] == "person"
+    end
+
+    def group?
+      params[:parent] == "group"
+    end
+    
     def correct_user_required
       @gallery = Gallery.find(params[:id])
       if @gallery.nil?
         flash[:error] = "No gallery found"
         redirect_to person_galleries_path(current_person)
-      elsif @gallery.person != current_person
+      elsif @gallery.owner_type == "Person"
+        if @gallery.owner != current_person 
+          flash[:error] = "You are not the owner of this gallery"
+          redirect_to person_galleries_path(@gallery.owner)
+        end
+      elsif !current_person.own_groups.include?(@gallery.owner)
         flash[:error] = "You are not the owner of this gallery"
-        redirect_to person_galleries_path(@gallery.person)
+        redirect_to person_galleries_path(@gallery.owner)
       end
     end
 end

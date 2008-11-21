@@ -10,7 +10,7 @@
     <%= link_to image_tag(photo.public_filename(:thumbnail)),
                 '#gpu' + photo_id(photo), :rel => 'facebox' %>
   </div>
-  <%- if current_person?(photo.person) -%>
+  <%- if current_person?(photo.owner) or current_person.own_groups.include?(photo.owner) -%>
   <div class='gallPhotoMeta'>
       <%= link_to image_tag("icons/picture_edit.png", :class => 'actioner'), 
                   edit_photo_path(photo),
@@ -19,9 +19,11 @@
         photo_path(photo), :method => :delete,
         :confirm => 'Really delete this photo?',
          :title => 'Delete photo' %>
+      <% text = photo.owner_type == "Person" ? 
+                'Select as your profile photo' : 'Select as group profile photo' %>
       <%= link_to image_tag("default_thumbnail.png", :class => 'actioner', 
         :style => 'height: 16px;'), set_avatar_photo_path(photo), 
-        :method => :put, :title => 'Select as your profile photo' %>
+        :method => :put, :title => text %>
       <%= link_to image_tag("icons/photo.png", :class => 'actioner', 
         :style => 'height: 16px;'), set_primary_photo_path(photo), 
         :method => :put, :title => 'Select as gallery thumbnail' %>

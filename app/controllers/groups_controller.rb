@@ -13,7 +13,11 @@ class GroupsController < ApplicationController
 
   def show
     @group = Group.find(params[:id])
-    @contacts = contacts_to_invite
+    @parent = @group
+    num_contacts = Person::MAX_DEFAULT_CONTACTS
+    @members = @group.people
+    @some_members = @members[0...num_contacts]
+    @galleries = @group.galleries.paginate(:page => params[:page])
     group_redirect_if_not_public 
   end
 
@@ -101,8 +105,7 @@ class GroupsController < ApplicationController
     @group = Group.find(params[:id])
     @members = @group.people.paginate(:page => params[:page],
                                           :per_page => RASTER_PER_PAGE)
-    @pending = @group.pending_request.paginate(:page => params[:page],
-                                          :per_page => RASTER_PER_PAGE)
+    @pending = @group.pending_request
     group_redirect_if_not_public
   end
   
@@ -177,7 +180,7 @@ class GroupsController < ApplicationController
     respond_to do |format|
       #FIXME:it must be another way to do this if
       if @group.public? or @group.private? or current_person.admin? or 
-          @group.owner?(current_person) or @group.has_invited?(current_person)
+          @group.owner?(current_person) or @group.has_invited?(current_person) or
           (@group.hidden? and @group.people.include?(current_person))
         format.html
       else

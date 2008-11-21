@@ -18,10 +18,10 @@
     <%= render :partial => 'invitations' %>
     <%= render :partial => 'shared/contacts_preview',
                :locals => { :person => current_person } %>
-    <%= render :partial => 'people/groups', 
+    <%= render :partial => 'shared/groups', 
                :locals => {:groups => current_person.own_groups,
                :title => "Admin Groups", :link => "admin"} %>
-    <%= render :partial => 'people/groups',
+    <%= render :partial => 'shared/groups',
                :locals => {:groups => current_person.groups,
                :title => "Groups", :link => "groups"} %>
   <%- else -%>

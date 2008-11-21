@@ -87,7 +87,7 @@ describe Connection do
     connection = Connection.connect(@person, @contact)
     activity = Activity.find_by_item_id(connection)
     activity.should_not be_nil
-    activity.person.should_not be_nil
+    activity.owner.should_not be_nil
   end
   
   it "should not create an activity for a connection with the first admin" do

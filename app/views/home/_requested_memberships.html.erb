@@ -13,14 +13,10 @@
           ago
         </p>
         <p>
-          <%= link_to "View group", group_path(request.group) %> |
-          <%= link_to "View profile", request.person %>
+          <%= link_to "Respond", edit_membership_path(request)+'?invitation=true' %> |
+          <%= link_to "View group", members_group_path(request.group) %>
         </p>
       </li>
     <%- end -%>
-    <li class="more">
-      <%= link_to "See all &raquo;", 
-          request_memberships_person_path(current_person) %>
-    </li>
   </ul>
 <%- end -%>
